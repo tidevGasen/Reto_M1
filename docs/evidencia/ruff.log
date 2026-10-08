@@ -1,0 +1,4 @@
+$ ruff check src --statistics   (commit 4ddb755)
+
+$ ruff check src
+All checks passed!
