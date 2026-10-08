@@ -1,7 +1,8 @@
 """Reportes de la tienda: inventario, ventas y mas vendidos."""
 
-
 import gestor
+
+STOCK_MINIMO = 5  # por debajo de este stock se considera "stock bajo"
 
 
 def hacer_cosa(v):
@@ -11,7 +12,7 @@ def hacer_cosa(v):
 
 def productos_stock_bajo():
     """Regresa la lista de productos con stock por debajo del minimo."""
-    return [p for p in gestor.INVENTARIO.values() if p["stock"] < 5]
+    return [p for p in gestor.INVENTARIO.values() if p["stock"] < STOCK_MINIMO]
 
 
 def reporte_inventario():
@@ -22,7 +23,7 @@ def reporte_inventario():
             f"{p['codigo']} | {p['nombre']} | {hacer_cosa(p['precio'])}"
             f" | stock: {p['stock']}"
         )
-        if p["stock"] < 5:
+        if p["stock"] < STOCK_MINIMO:
             linea += "  <-- STOCK BAJO"
         lineas.append(linea)
     valor = sum(p["precio"] * p["stock"] for p in gestor.INVENTARIO.values())
