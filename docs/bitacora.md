@@ -1,7 +1,6 @@
 # Bitácora de refactorización
 
 **Nombre:** Juan Pablo Alegría
-**Matrícula:**
 **Fecha:** 2026-10-07
 **Herramienta:** Claude Code (app de escritorio, modelo Claude Opus 5.5)
 
