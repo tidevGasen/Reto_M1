@@ -2,19 +2,35 @@
 
 import json
 import os
+import tempfile
 
 import gestor
 
 
 def guardar_datos(ruta):
-    """Guarda el inventario, las ventas y el folio actual en un JSON."""
+    """Guarda el inventario, las ventas y el folio actual en un JSON.
+
+    Escribe primero en un temporal de la misma carpeta y luego lo
+    reemplaza de forma atomica: si el proceso se interrumpe a la mitad,
+    el archivo anterior queda intacto en lugar de quedar corrupto.
+    """
     datos = {
         "inventario": gestor.INVENTARIO,
         "ventas": gestor.VENTAS,
         "contador": gestor.contador_ventas,
     }
-    with open(ruta, "w", encoding="utf-8") as archivo:
-        json.dump(datos, archivo, indent=2, ensure_ascii=False)
+    carpeta = os.path.dirname(os.path.abspath(ruta))
+    with tempfile.NamedTemporaryFile(
+        "w", encoding="utf-8", dir=carpeta, suffix=".tmp", delete=False
+    ) as archivo:
+        temporal = archivo.name
+        try:
+            json.dump(datos, archivo, indent=2, ensure_ascii=False)
+        except BaseException:
+            archivo.close()
+            os.remove(temporal)
+            raise
+    os.replace(temporal, ruta)
     return True
 
 
