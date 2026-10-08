@@ -1,0 +1,20 @@
+$ git diff --stat f0b9b6e HEAD -- tests/conftest.py tests/test_almacen.py tests/test_gestor.py tests/test_reportes.py pyproject.toml
+(sin salida = sin cambios)
+
+$ git diff --stat f0b9b6e HEAD -- tests/
+ tests/test_caracterizacion.py | 230 ++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 230 insertions(+)
+
+$ git log --oneline main..refactorizacion
+4ddb755 refactor: agrega type hints y TypedDict de producto y venta
+b0befa2 refactor: guarda datos con escritura atomica
+16aee04 refactor: separa menu en diccionario de opciones con una funcion por opcion
+3f78f04 refactor: renombra identificadores a snake_case descriptivo
+eb0ff4e refactor: usa with open y excepciones especificas en almacen
+7e7f579 refactor: divide registrar_venta y reemplaza numeros magicos por constantes
+5e26e7c refactor: optimiza bucles y reemplaza bubble sort por sorted
+e3e59d0 refactor: elimina codigo muerto y aplica arreglos triviales de ruff
+31e9268 docs: CLAUDE.md v3 con flujo obligatorio por prompt
+12bbc1e test: agrega pruebas de caracterizacion antes de refactorizar
+102fa8a docs: CLAUDE.md v2, .claudeignore y bitacora inicial
+17ce05e CLAUDE.md inicial generado con /init

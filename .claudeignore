@@ -1,0 +1,17 @@
+# Entornos y dependencias: miles de archivos sin relación con el reto
+.venv/
+venv/
+
+# Cachés generadas por Python, pytest y ruff
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Basura del sistema operativo y metadatos de git
+.DS_Store
+.git/
+
+# Datos que el menú interactivo sobrescribe al guardar (no es código)
+datos_ejemplo.json
+*.json.bak
