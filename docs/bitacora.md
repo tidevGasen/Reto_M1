@@ -85,7 +85,7 @@ pasan con el código original, así describen el comportamiento real.
 
 | #  | Prompt usado | Cambio realizado | Justificación | Tests OK | Ruff |
 |----|--------------|------------------|---------------|----------|------|
-| 1  |              |                  |               |          |      |
+| 1  | "Realiza una limpieza de código, optimizando el código existente, no cambiando su funcionalidad" | **Plan (versión `31e9268`):** eliminar código muerto y obsoleto + arreglos triviales de ruff. **Cambio:** se eliminaron `calcular_descuento_viejo`, el bloque comentado `exportar_txt` y la constante sin uso `MODO_DEBUG` (`gestor.py`), `reporteViejoCSV` e `import os` sin uso (`reportes.py`); se reemplazó el docstring obsoleto de `gestor.py` ("lo fueron parchando varias personas..."); `ruff --fix` quitó los 4 encabezados `# -*- coding: utf-8 -*-`, el modo `"r"` redundante en `almacen.cargar_datos` y ordenó los imports de `main.py`. Antes de borrar se verificó con grep que nada en `src/` ni `tests/` usaba ese código. | El código muerto confunde ("¿se usa?, ¿lo puedo borrar?") y agrega superficie de mantenimiento; git conserva el historial si algún día se necesita. Los encabezados `coding` son innecesarios en Python 3. | ✅ 49 passed (1 iteración) | 20 → 11 |
 | 2  |              |                  |               |          |      |
 | 3  |              |                  |               |          |      |
 | 4  |              |                  |               |          |      |
@@ -96,7 +96,10 @@ pasan con el código original, así describen el comportamiento real.
 | Qué pasó | Cómo se detectó | Cómo se resolvió |
 |---|---|---|
 | `.gitignore` creado con `Out-File` quedó con BOM y la regla `__pycache__/` no aplicaba | Revisión de los bytes del archivo (`od -c`) | Se reescribió sin BOM |
+| Refactorización 1: el reemplazo por script de `calcular_descuento_viejo`/`exportar_txt` no encontró el texto (diferencias de escape/saltos de línea) y el bloque quedó en el archivo | El grep de verificación posterior seguía mostrando `calcular_descuento_viejo` | Se eliminó con edición directa del bloque exacto; lección: verificar siempre después de un cambio automatizado, no asumir que se aplicó |
 
 ## Variaciones de prompts
 
-*(Se llena conforme se comparan prompts.)*
+| Refactorización | Prompt | Qué hizo la IA | Observación |
+|---|---|---|---|
+| 1 | Vago: "Realiza una limpieza de código, optimizando el código existente, no cambiando su funcionalidad" | Por la regla de `CLAUDE.md` ("un solo tipo de refactorización por prompt") lo acotó a **limpieza** (código muerto + arreglos triviales de ruff) y dejó "optimizar" (bubble sort, sumas manuales) para otra refactorización | Un prompt vago podía mezclar varios cambios en un commit; el `CLAUDE.md` funcionó como guardarraíl. Un prompt explícito ("elimina X, Y, Z; verifica con grep") habría evitado que la IA tuviera que interpretar |
