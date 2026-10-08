@@ -11,69 +11,53 @@ def hacer_cosa(v):
 
 def productos_stock_bajo():
     """Regresa la lista de productos con stock por debajo del minimo."""
-    temp2 = []
-    for k in gestor.INVENTARIO:
-        if gestor.INVENTARIO[k]["stock"] < 5:
-            temp2.append(gestor.INVENTARIO[k])
-    return temp2
+    return [p for p in gestor.INVENTARIO.values() if p["stock"] < 5]
 
 
 def reporte_inventario():
     """Arma el reporte del inventario, lo imprime y lo regresa como texto."""
-    s = "===== INVENTARIO =====\n"
-    aux = 0
-    for k in gestor.INVENTARIO:
-        p = gestor.INVENTARIO[k]
-        linea = p["codigo"] + " | " + p["nombre"] + " | "
-        linea = linea + hacer_cosa(p["precio"]) + " | stock: " + str(p["stock"])
+    lineas = ["===== INVENTARIO ====="]
+    for p in gestor.INVENTARIO.values():
+        linea = (
+            f"{p['codigo']} | {p['nombre']} | {hacer_cosa(p['precio'])}"
+            f" | stock: {p['stock']}"
+        )
         if p["stock"] < 5:
-            linea = linea + "  <-- STOCK BAJO"
-        s = s + linea + "\n"
-        aux = aux + p["precio"] * p["stock"]
-    s = s + "Valor total del inventario: " + hacer_cosa(aux) + "\n"
+            linea += "  <-- STOCK BAJO"
+        lineas.append(linea)
+    valor = sum(p["precio"] * p["stock"] for p in gestor.INVENTARIO.values())
+    lineas.append(f"Valor total del inventario: {hacer_cosa(valor)}")
+    s = "\n".join(lineas) + "\n"
     print(s)
     return s
 
 
 def total_vendido():
     """Suma el total (con IVA) de todas las ventas registradas."""
-    t = 0
-    for v in gestor.VENTAS:
-        t = t + v["total"]
-    return round(t, 2)
+    return round(sum(v["total"] for v in gestor.VENTAS), 2)
 
 
 def mas_vendidos(n=3):
     """Regresa los n productos mas vendidos como lista de (codigo, unidades)."""
-    aux = {}
+    unidades = {}
     for v in gestor.VENTAS:
-        if v["codigo"] in aux:
-            aux[v["codigo"]] = aux[v["codigo"]] + v["cantidad"]
-        else:
-            aux[v["codigo"]] = v["cantidad"]
-    temp = []
-    for k in aux:
-        temp.append((k, aux[k]))
-    # ordenamiento de burbuja (TODO: algun dia usar sorted)
-    for i in range(len(temp)):
-        for j in range(0, len(temp) - i - 1):
-            if temp[j][1] < temp[j + 1][1]:
-                t = temp[j]
-                temp[j] = temp[j + 1]
-                temp[j + 1] = t
-    return temp[0:n]
+        unidades[v["codigo"]] = unidades.get(v["codigo"], 0) + v["cantidad"]
+    # sorted es estable: en empate conserva el orden de primera venta
+    return sorted(unidades.items(), key=lambda par: par[1], reverse=True)[:n]
 
 
 def resumen_ventas():
     """Arma el resumen de ventas del dia, lo imprime y lo regresa."""
-    s = "===== RESUMEN DE VENTAS =====\n"
-    t = 0
+    lineas = ["===== RESUMEN DE VENTAS ====="]
     for v in gestor.VENTAS:
-        s = s + "Folio " + str(v["folio"]) + ": " + v["nombre"]
-        s = s + " x" + str(v["cantidad"]) + " = " + hacer_cosa(v["total"]) + "\n"
-        t = t + v["total"]
-    s = s + "Numero de ventas: " + str(len(gestor.VENTAS)) + "\n"
-    s = s + "Total del dia: " + hacer_cosa(t) + "\n"
+        lineas.append(
+            f"Folio {v['folio']}: {v['nombre']} x{v['cantidad']}"
+            f" = {hacer_cosa(v['total'])}"
+        )
+    total = sum(v["total"] for v in gestor.VENTAS)
+    lineas.append(f"Numero de ventas: {len(gestor.VENTAS)}")
+    lineas.append(f"Total del dia: {hacer_cosa(total)}")
+    s = "\n".join(lineas) + "\n"
     print(s)
     return s
 

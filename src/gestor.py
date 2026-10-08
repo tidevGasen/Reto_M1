@@ -73,11 +73,8 @@ def actualizar_stock(codigo, cantidad):
 
 def buscarProducto(texto):
     # busca productos cuyo nombre contenga el texto (sin importar mayusculas)
-    temp2 = []
-    for k in INVENTARIO:
-        if texto.lower() in INVENTARIO[k]["nombre"].lower():
-            temp2.append(INVENTARIO[k])
-    return temp2
+    texto = texto.lower()
+    return [p for p in INVENTARIO.values() if texto in p["nombre"].lower()]
 
 
 def registrar_venta(codigo, cantidad, cliente=""):

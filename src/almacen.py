@@ -35,11 +35,9 @@ def cargar_datos(ruta):
         return False
     f.close()
     gestor.INVENTARIO.clear()
-    for k in d["inventario"]:
-        gestor.INVENTARIO[k] = d["inventario"][k]
+    gestor.INVENTARIO.update(d["inventario"])
     gestor.VENTAS.clear()
-    for v in d["ventas"]:
-        gestor.VENTAS.append(v)
+    gestor.VENTAS.extend(d["ventas"])
     gestor.contadorVentas = d.get("contador", 0)
     return True
 
