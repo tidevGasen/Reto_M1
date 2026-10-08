@@ -8,13 +8,13 @@ import gestor
 
 def guardar_datos(ruta):
     """Guarda el inventario, las ventas y el folio actual en un JSON."""
-    d = {
+    datos = {
         "inventario": gestor.INVENTARIO,
         "ventas": gestor.VENTAS,
-        "contador": gestor.contadorVentas,
+        "contador": gestor.contador_ventas,
     }
-    with open(ruta, "w", encoding="utf-8") as f:
-        json.dump(d, f, indent=2, ensure_ascii=False)
+    with open(ruta, "w", encoding="utf-8") as archivo:
+        json.dump(datos, archivo, indent=2, ensure_ascii=False)
     return True
 
 
@@ -28,19 +28,19 @@ def cargar_datos(ruta):
         gestor.ultimo_error = "el archivo no existe"
         return False
     try:
-        with open(ruta, encoding="utf-8") as f:
-            d = json.load(f)
+        with open(ruta, encoding="utf-8") as archivo:
+            datos = json.load(archivo)
     except (json.JSONDecodeError, UnicodeDecodeError):
         gestor.ultimo_error = "archivo corrupto"
         return False
     gestor.INVENTARIO.clear()
-    gestor.INVENTARIO.update(d["inventario"])
+    gestor.INVENTARIO.update(datos["inventario"])
     gestor.VENTAS.clear()
-    gestor.VENTAS.extend(d["ventas"])
-    gestor.contadorVentas = d.get("contador", 0)
+    gestor.VENTAS.extend(datos["ventas"])
+    gestor.contador_ventas = datos.get("contador", 0)
     return True
 
 
-def hayArchivo(ruta):
+def hay_archivo(ruta):
     """Indica si ya existe el archivo de datos."""
     return os.path.exists(ruta)

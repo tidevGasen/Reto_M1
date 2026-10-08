@@ -91,13 +91,11 @@ Cada prompt de cambio se atiende siguiendo estos pasos, en orden:
 
 ## Arquitectura
 
-Todo el estado vive como **globales de módulo en `src/gestor.py`**: `INVENTARIO` (dict código → dict producto), `VENTAS` (lista de dicts), `contadorVentas` (folio) y `ultimo_error` (último mensaje de error). Los demás módulos dependen de `gestor` y mutan/leen ese estado directamente:
+Todo el estado vive como **globales de módulo en `src/gestor.py`**: `INVENTARIO` (dict código → dict producto), `VENTAS` (lista de dicts), `contador_ventas` (folio) y `ultimo_error` (último mensaje de error). Los demás módulos dependen de `gestor` y mutan/leen ese estado directamente:
 
-- `gestor.py` — lógica de negocio. Las funciones reportan fallos devolviendo `False`/`None` y dejando el motivo en `ultimo_error` (no lanzan excepciones). `registrar_venta` calcula descuento por volumen (≥500 → 5 %, ≥1000 → 10 %), extra VIP de 2 % (cliente que empieza con "VIP" y subtotal−descuento > 200), IVA 16 %, descuenta stock, genera folio y arma el ticket en texto. `cotizar` duplica el cálculo de descuento/IVA (sin el extra VIP) sin registrar nada.
-- `almacen.py` — persistencia JSON: `guardar_datos`/`cargar_datos` escriben y reemplazan el estado global de `gestor` (incluida la asignación a `gestor.contadorVentas` y `gestor.ultimo_error`, por lo que esas globales deben seguir accesibles como atributos del módulo).
-- `reportes.py` — reportes que **imprimen y además devuelven** el texto (`reporte_inventario`, `resumen_ventas`); umbral de stock bajo = 5 en `productos_stock_bajo` y en `reporte_inventario`. `mas_vendidos` devuelve lista de `(codigo, unidades)`.
+- `gestor.py` — lógica de negocio. Las funciones reportan fallos devolviendo `False`/`None` y dejando el motivo en `ultimo_error` (no lanzan excepciones). `registrar_venta` calcula descuento por volumen (≥500 → 5 %, ≥1000 → 10 %), extra VIP de 2 % (cliente que empieza con "VIP" y subtotal−descuento > 200), IVA 16 % (constantes al inicio del módulo). `registrar_venta` orquesta `_validar_venta` → `calcular_importes` → descuento de stock y folio → `_armar_ticket`. `cotizar` reutiliza `calcular_importes` sin cliente (sin extra VIP) y no registra nada.
+- `almacen.py` — persistencia JSON: `guardar_datos`/`cargar_datos` escriben y reemplazan el estado global de `gestor` (incluida la asignación a `gestor.contador_ventas` y `gestor.ultimo_error`, por lo que esas globales deben seguir accesibles como atributos del módulo). La clave en el JSON sigue siendo `"contador"` (compatibilidad con archivos existentes). `hay_archivo` indica si existe el archivo de datos.
+- `reportes.py` — reportes que **imprimen y además devuelven** el texto (`reporte_inventario`, `resumen_ventas`); umbral de stock bajo en la constante `STOCK_MINIMO = 5`; `formatear_dinero` da formato `$` + `str(round(x, 2))`. `mas_vendidos` devuelve lista de `(codigo, unidades)`.
 - `main.py` — menú interactivo; mezcla I/O con llamadas a `gestor`/`reportes`/`almacen` y lee `gestor.ultimo_error` para mostrar errores.
 
 Los tests (`tests/conftest.py`) insertan `src/` en `sys.path`, importan `gestor` como módulo plano (sin paquete) y llaman `gestor.reiniciar_sistema()` antes y después de cada prueba; los módulos se importan entre sí por nombre simple (`import gestor`), así que no convertir `src` en paquete sin ajustar eso.
-
-Código muerto conocido (candidato a eliminar): `calcular_descuento_viejo`, bloque comentado `exportar_txt` en `gestor.py` y `reporteViejoCSV` en `reportes.py`.
