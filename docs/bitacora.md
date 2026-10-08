@@ -56,6 +56,30 @@ ruff check src   -> Found 20 errors
 |---|---|---|---|
 | v2 | "Mejora el CLAUDE.md añadiendo detalles especifícos sobre las carácteristicas del proyecto además de listados detallados de lo existente y crea un archivo .claudeignore y corrige .gitignore" | Se agregó: lista exacta de API pública que usan los tests, flujo por refactorización, convenciones de estilo con ejemplos, lista de comportamientos frágiles (mensajes de error, orden de validación, regla VIP, redondeo, formato de ticket). Se creó `.claudeignore`. Se corrigió `.gitignore` (tenía BOM UTF-8 de PowerShell que invalidaba la primera regla) | v1 describía el código pero no decía *cómo* trabajar ni qué detalles se rompen fácilmente; v2 reduce el riesgo de que la IA cambie comportamiento sin que los tests lo detecten |
 
+## Red de seguridad: tests de caracterización
+
+**Prompt:**
+
+> Agrega test adicionales de caracterización en un archivo nuevo para no romper los existentes
+
+**Cambio:** se agregó `tests/test_caracterizacion.py` (archivo nuevo; los tests
+originales no se tocaron) con 29 casos que fijan lo que la suite original no
+cubría: texto exacto del ticket con y sin descuento, campos de la venta,
+umbrales de descuento en 500/1000 (incluyendo los valores frontera), regla VIP
+(`> 200` estricto, prefijo sensible a mayúsculas), que `cotizar` no aplica VIP,
+todos los mensajes de `ultimo_error` y su orden de validación, formato exacto
+de `reporte_inventario` y `resumen_ventas` (texto devuelto **e** impreso),
+umbral de stock bajo, empates en `mas_vendidos`, archivo JSON corrupto,
+estructura del JSON guardado y que `reiniciar_sistema` conserve los mismos
+objetos (`almacen` depende de ello).
+
+**Justificación:** la suite original solo revisa totales y algunos casos;
+una refactorización podría cambiar el ticket o un mensaje de error y seguir
+"en verde". Se escribieron **antes** de tocar el código y se verificó que
+pasan con el código original, así describen el comportamiento real.
+
+**Resultado:** `pytest` → 49 passed (20 originales + 29 nuevos). Ruff sin cambios (20).
+
 ## Refactorizaciones
 
 | #  | Prompt usado | Cambio realizado | Justificación | Tests OK | Ruff |
