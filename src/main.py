@@ -1,5 +1,7 @@
 """Punto de entrada del gestor de tienda (menu interactivo en consola)."""
 
+from collections.abc import Callable
+
 import almacen
 import gestor
 import reportes
@@ -7,7 +9,7 @@ import reportes
 ARCHIVO = "datos_ejemplo.json"
 
 
-def pedir_numero(mensaje):
+def pedir_numero(mensaje: str) -> float:
     """Pide un numero al usuario hasta que escriba algo valido."""
     while True:
         respuesta = input(mensaje)
@@ -17,11 +19,11 @@ def pedir_numero(mensaje):
             print("Eso no es un numero, intenta de nuevo.")
 
 
-def mostrar_error():
+def mostrar_error() -> None:
     print("Error:", gestor.ultimo_error)
 
 
-def agregar_producto():
+def agregar_producto() -> None:
     codigo = input("Codigo: ")
     nombre = input("Nombre: ")
     precio = pedir_numero("Precio: ")
@@ -32,7 +34,7 @@ def agregar_producto():
         mostrar_error()
 
 
-def registrar_venta():
+def registrar_venta() -> None:
     codigo = input("Codigo del producto: ")
     cantidad = int(pedir_numero("Cantidad: "))
     cliente = input("Codigo de cliente (enter si no tiene): ")
@@ -43,7 +45,7 @@ def registrar_venta():
         mostrar_error()
 
 
-def cotizar():
+def cotizar() -> None:
     codigo = input("Codigo del producto: ")
     cantidad = int(pedir_numero("Cantidad: "))
     total = gestor.cotizar(codigo, cantidad)
@@ -53,12 +55,12 @@ def cotizar():
         mostrar_error()
 
 
-def mostrar_mas_vendidos():
+def mostrar_mas_vendidos() -> None:
     for codigo, unidades in reportes.mas_vendidos():
         print(codigo, "->", unidades, "unidades")
 
 
-def mostrar_stock_bajo():
+def mostrar_stock_bajo() -> None:
     bajos = reportes.productos_stock_bajo()
     if not bajos:
         print("No hay productos con stock bajo.")
@@ -66,7 +68,7 @@ def mostrar_stock_bajo():
         print("OJO:", producto["nombre"], "solo tiene", producto["stock"], "unidades")
 
 
-def guardar_y_salir():
+def guardar_y_salir() -> bool:
     """Guarda los datos y regresa True para terminar el menu."""
     almacen.guardar_datos(ARCHIVO)
     print("Datos guardados. Hasta luego.")
@@ -75,7 +77,7 @@ def guardar_y_salir():
 
 # Cada opcion: tecla -> (etiqueta mostrada, funcion que la atiende).
 # Una funcion que regresa True termina el menu.
-OPCIONES = {
+OPCIONES: dict[str, tuple[str, Callable[[], object]]] = {
     "1": ("Agregar producto", agregar_producto),
     "2": ("Registrar venta", registrar_venta),
     "3": ("Cotizar", cotizar),
@@ -87,19 +89,19 @@ OPCIONES = {
 }
 
 
-def cargar_datos_iniciales():
+def cargar_datos_iniciales() -> None:
     if almacen.hay_archivo(ARCHIVO):
         almacen.cargar_datos(ARCHIVO)
         print("Datos cargados de", ARCHIVO)
 
 
-def mostrar_opciones():
+def mostrar_opciones() -> None:
     print("")
     for tecla, (etiqueta, _) in OPCIONES.items():
         print(f"{tecla}) {etiqueta}")
 
 
-def menu():
+def menu() -> None:
     """Ciclo principal: muestra el menu y despacha la opcion elegida."""
     print("Bienvenido al gestor de la tienda La Esquina")
     cargar_datos_iniciales()

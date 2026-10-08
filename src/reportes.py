@@ -1,16 +1,17 @@
 """Reportes de la tienda: inventario, ventas y mas vendidos."""
 
 import gestor
+from gestor import Producto
 
 STOCK_MINIMO = 5  # por debajo de este stock se considera "stock bajo"
 
 
-def formatear_dinero(monto):
+def formatear_dinero(monto: float) -> str:
     """Da formato de dinero: $ seguido del monto redondeado a 2 decimales."""
     return "$" + str(round(monto, 2))
 
 
-def productos_stock_bajo():
+def productos_stock_bajo() -> list[Producto]:
     """Regresa la lista de productos con stock por debajo del minimo."""
     return [
         producto
@@ -19,7 +20,7 @@ def productos_stock_bajo():
     ]
 
 
-def reporte_inventario():
+def reporte_inventario() -> str:
     """Arma el reporte del inventario, lo imprime y lo regresa como texto."""
     lineas = ["===== INVENTARIO ====="]
     for producto in gestor.INVENTARIO.values():
@@ -38,14 +39,14 @@ def reporte_inventario():
     return texto
 
 
-def total_vendido():
+def total_vendido() -> float:
     """Suma el total (con IVA) de todas las ventas registradas."""
     return round(sum(venta["total"] for venta in gestor.VENTAS), 2)
 
 
-def mas_vendidos(n=3):
+def mas_vendidos(n: int = 3) -> list[tuple[str, int]]:
     """Regresa los n productos mas vendidos como lista de (codigo, unidades)."""
-    unidades = {}
+    unidades: dict[str, int] = {}
     for venta in gestor.VENTAS:
         codigo = venta["codigo"]
         unidades[codigo] = unidades.get(codigo, 0) + venta["cantidad"]
@@ -53,7 +54,7 @@ def mas_vendidos(n=3):
     return sorted(unidades.items(), key=lambda par: par[1], reverse=True)[:n]
 
 
-def resumen_ventas():
+def resumen_ventas() -> str:
     """Arma el resumen de ventas del dia, lo imprime y lo regresa."""
     lineas = ["===== RESUMEN DE VENTAS ====="]
     for venta in gestor.VENTAS:
