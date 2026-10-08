@@ -27,12 +27,41 @@ cd src && python main.py            # menú interactivo (lee/escribe ../datos_ej
 - Validar con `pytest` **y** `ruff check src` después de cada refactorización; commits atómicos (uno por refactorización) en la rama `refactorizacion`, entrega por PR hacia `main`. Documentar cada prompt/cambio en `docs/bitacora.md` y la reflexión en `docs/reflexion.md`.
 - Se permite **agregar** archivos de prueba nuevos (p. ej. `tests/test_caracterizacion.py`) para fijar comportamiento antes de refactorizar, pero nunca editar los existentes.
 
-## Flujo de trabajo por refactorización
+## Flujo obligatorio para cada prompt
 
-1. Explicar primero qué se va a cambiar y por qué (sin tocar código).
-2. Aplicar **un solo tipo** de refactorización por paso; no mezclar renombrados con cambios de lógica.
-3. Correr `pytest` y `ruff check src`; reportar el conteo de tests y de errores de ruff antes/después.
-4. Mostrar el diff y proponer el mensaje de commit (Conventional Commits en español: `refactor: ...`, `docs: ...`, `test: ...`).
+Cada prompt de cambio se atiende siguiendo estos pasos, en orden:
+
+1. **Revisión previa:** leer el código afectado, buscar en `src/` y `tests/` los usos de lo que se va a tocar y registrar el estado inicial (`pytest` y `ruff check src`).
+2. **Plan en la bitácora:** escribir en `docs/bitacora.md` un plan resumido, indicando la **versión del código** de partida (hash corto del commit actual, `git rev-parse --short HEAD`). Aplicar **un solo tipo** de refactorización por prompt.
+3. **Ejecución de cambios.**
+4. **Ejecución de pruebas:** `pytest` y `ruff check src`.
+   - Si alguna prueba falla, repetir los pasos 3 y 4 usando la salida de las pruebas fallidas como insumo.
+   - Máximo **5 repeticiones** de los pasos 3 y 4. Si después de 5 siguen fallando: detenerse, no hacer commit, revertir los cambios (`git restore`), documentar el intento fallido en la bitácora e informar al usuario.
+   - La salida del ciclo es que **todas** las pruebas pasen.
+5. **Commit:** con todas las pruebas en verde, completar la fila de la bitácora (prompt, cambio, justificación, resultado de tests y ruff, número de iteraciones) y hacer commit en la rama `refactorizacion` (sin push salvo que se pida). El mensaje lleva un título en Conventional Commits en español y el cuerpo es un JSON con un objeto por cambio:
+
+   ```text
+   refactor: elimina codigo muerto en gestor y reportes
+
+   [
+     {
+       "id": "C-1",
+       "archivo": "src/gestor.py",
+       "funcion": "calcular_descuento_viejo",
+       "cambio": "Se elimina la funcion sin usos (verificado con grep en src/ y tests/)"
+     },
+     {
+       "id": "C-2",
+       "archivo": "src/reportes.py",
+       "funcion": "reporteViejoCSV",
+       "cambio": "Se elimina la funcion sin usos"
+     }
+   ]
+
+   Co-Authored-By: ...
+   ```
+
+   Los `id` son consecutivos por commit (`C-1`, `C-2`, ...). `funcion` es el nombre **original** de la función afectada (o `"(modulo)"` si el cambio es a nivel de archivo).
 
 ## Convenciones de estilo
 
